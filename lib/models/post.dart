@@ -1,8 +1,14 @@
 enum PostType {
   text,
   image,
-  song,
-  quote,
+}
+
+class CommentItem {
+  final String text;
+  final bool isAI;
+  final bool isReply;
+
+  const CommentItem({required this.text, this.isAI = false, this.isReply = false});
 }
 
 class Post {
@@ -12,6 +18,9 @@ class Post {
   final DateTime timestamp;
   final int likes;
   final int comments;
+  final bool isLiked;
+  final bool isMine;
+  final List<CommentItem> commentList;
   final Map<String, dynamic>? media;
 
   const Post({
@@ -21,6 +30,9 @@ class Post {
     required this.timestamp,
     this.likes = 0,
     this.comments = 0,
+    this.isLiked = false,
+    this.isMine = false,
+    this.commentList = const [],
     this.media,
   });
 
@@ -28,6 +40,9 @@ class Post {
     String? content,
     int? likes,
     int? comments,
+    bool? isLiked,
+    bool? isMine,
+    List<CommentItem>? commentList,
     Map<String, dynamic>? media,
   }) {
     return Post(
@@ -37,27 +52,10 @@ class Post {
       timestamp: timestamp,
       likes: likes ?? this.likes,
       comments: comments ?? this.comments,
+      isLiked: isLiked ?? this.isLiked,
+      isMine: isMine ?? this.isMine,
+      commentList: commentList ?? this.commentList,
       media: media ?? this.media,
     );
   }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'content': content,
-    'type': type.index,
-    'timestamp': timestamp.toIso8601String(),
-    'likes': likes,
-    'comments': comments,
-    'media': media,
-  };
-
-  factory Post.fromJson(Map<String, dynamic> json) => Post(
-    id: json['id'],
-    content: json['content'],
-    type: PostType.values[json['type']],
-    timestamp: DateTime.parse(json['timestamp']),
-    likes: json['likes'] ?? 0,
-    comments: json['comments'] ?? 0,
-    media: json['media'],
-  );
 }

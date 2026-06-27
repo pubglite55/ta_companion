@@ -46,6 +46,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          if (messages.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, size: 20),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('清空聊天记录'),
+                    content: const Text('确定要清空所有聊天记录吗？此操作不可撤销。'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+                      TextButton(
+                        onPressed: () {
+                          ref.read(chatProvider.notifier).clearChat();
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('清空', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              tooltip: '清空记录',
+            ),
+        ],
       ),
       body: Column(
         children: [

@@ -6,9 +6,10 @@ class AppSettings {
   final String companionPersonality;
   final String? aiProvider;
   final String? aiApiKey;
-  final String? weatherApiKey;
-  final String? musicApiKey;
-  final String? newsApiKey;
+  final String? aiBaseUrl;
+  final String? aiModel;
+  final String? customPrompt;
+  final bool isDarkMode;
   final bool morningGreeting;
   final bool noonShare;
   final bool eveningChat;
@@ -19,9 +20,10 @@ class AppSettings {
     this.companionPersonality = '温柔亲密',
     this.aiProvider,
     this.aiApiKey,
-    this.weatherApiKey,
-    this.musicApiKey,
-    this.newsApiKey,
+    this.aiBaseUrl,
+    this.aiModel,
+    this.customPrompt,
+    this.isDarkMode = false,
     this.morningGreeting = true,
     this.noonShare = true,
     this.eveningChat = true,
@@ -33,9 +35,10 @@ class AppSettings {
     String? companionPersonality,
     String? aiProvider,
     String? aiApiKey,
-    String? weatherApiKey,
-    String? musicApiKey,
-    String? newsApiKey,
+    String? aiBaseUrl,
+    String? aiModel,
+    String? customPrompt,
+    bool? isDarkMode,
     bool? morningGreeting,
     bool? noonShare,
     bool? eveningChat,
@@ -46,9 +49,10 @@ class AppSettings {
       companionPersonality: companionPersonality ?? this.companionPersonality,
       aiProvider: aiProvider ?? this.aiProvider,
       aiApiKey: aiApiKey ?? this.aiApiKey,
-      weatherApiKey: weatherApiKey ?? this.weatherApiKey,
-      musicApiKey: musicApiKey ?? this.musicApiKey,
-      newsApiKey: newsApiKey ?? this.newsApiKey,
+      aiBaseUrl: aiBaseUrl ?? this.aiBaseUrl,
+      aiModel: aiModel ?? this.aiModel,
+      customPrompt: customPrompt ?? this.customPrompt,
+      isDarkMode: isDarkMode ?? this.isDarkMode,
       morningGreeting: morningGreeting ?? this.morningGreeting,
       noonShare: noonShare ?? this.noonShare,
       eveningChat: eveningChat ?? this.eveningChat,
@@ -62,22 +66,28 @@ class SettingsProvider extends StateNotifier<AppSettings> {
     _loadSettings();
   }
 
-  final Box _box = Hive.box('settings');
+  Box? _box;
 
   void _loadSettings() {
-    state = AppSettings(
-      companionName: _box.get('companionName', defaultValue: 'TA'),
-      companionPersonality: _box.get('companionPersonality', defaultValue: '温柔亲密'),
-      aiProvider: _box.get('aiProvider'),
-      aiApiKey: _box.get('aiApiKey'),
-      weatherApiKey: _box.get('weatherApiKey'),
-      musicApiKey: _box.get('musicApiKey'),
-      newsApiKey: _box.get('newsApiKey'),
-      morningGreeting: _box.get('morningGreeting', defaultValue: true),
-      noonShare: _box.get('noonShare', defaultValue: true),
-      eveningChat: _box.get('eveningChat', defaultValue: true),
-      nightCare: _box.get('nightCare', defaultValue: true),
-    );
+    try {
+      _box = Hive.box('settings');
+      state = AppSettings(
+        companionName: _box!.get('companionName', defaultValue: 'TA'),
+        companionPersonality: _box!.get('companionPersonality', defaultValue: '温柔亲密'),
+        aiProvider: _box!.get('aiProvider'),
+        aiApiKey: _box!.get('aiApiKey'),
+        aiBaseUrl: _box!.get('aiBaseUrl'),
+        aiModel: _box!.get('aiModel'),
+        customPrompt: _box!.get('customPrompt'),
+        isDarkMode: _box!.get('isDarkMode', defaultValue: false),
+        morningGreeting: _box!.get('morningGreeting', defaultValue: true),
+        noonShare: _box!.get('noonShare', defaultValue: true),
+        eveningChat: _box!.get('eveningChat', defaultValue: true),
+        nightCare: _box!.get('nightCare', defaultValue: true),
+      );
+    } catch (e) {
+      print('[Settings] Load error: $e');
+    }
   }
 
   void updateSettings(AppSettings newSettings) {
@@ -86,17 +96,22 @@ class SettingsProvider extends StateNotifier<AppSettings> {
   }
 
   void _saveSettings() {
-    _box.put('companionName', state.companionName);
-    _box.put('companionPersonality', state.companionPersonality);
-    _box.put('aiProvider', state.aiProvider);
-    _box.put('aiApiKey', state.aiApiKey);
-    _box.put('weatherApiKey', state.weatherApiKey);
-    _box.put('musicApiKey', state.musicApiKey);
-    _box.put('newsApiKey', state.newsApiKey);
-    _box.put('morningGreeting', state.morningGreeting);
-    _box.put('noonShare', state.noonShare);
-    _box.put('eveningChat', state.eveningChat);
-    _box.put('nightCare', state.nightCare);
+    try {
+      _box?.put('companionName', state.companionName);
+      _box?.put('companionPersonality', state.companionPersonality);
+      _box?.put('aiProvider', state.aiProvider);
+      _box?.put('aiApiKey', state.aiApiKey);
+      _box?.put('aiBaseUrl', state.aiBaseUrl);
+      _box?.put('aiModel', state.aiModel);
+      _box?.put('customPrompt', state.customPrompt);
+      _box?.put('isDarkMode', state.isDarkMode);
+      _box?.put('morningGreeting', state.morningGreeting);
+      _box?.put('noonShare', state.noonShare);
+      _box?.put('eveningChat', state.eveningChat);
+      _box?.put('nightCare', state.nightCare);
+    } catch (e) {
+      print('[Settings] Save error: $e');
+    }
   }
 }
 
