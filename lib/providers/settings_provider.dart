@@ -14,6 +14,7 @@ class AppSettings {
   final bool noonShare;
   final bool eveningChat;
   final bool nightCare;
+  final bool autoTts;
 
   const AppSettings({
     this.companionName = 'TA',
@@ -28,6 +29,7 @@ class AppSettings {
     this.noonShare = true,
     this.eveningChat = true,
     this.nightCare = true,
+    this.autoTts = false,
   });
 
   AppSettings copyWith({
@@ -43,6 +45,7 @@ class AppSettings {
     bool? noonShare,
     bool? eveningChat,
     bool? nightCare,
+    bool? autoTts,
   }) {
     return AppSettings(
       companionName: companionName ?? this.companionName,
@@ -57,6 +60,7 @@ class AppSettings {
       noonShare: noonShare ?? this.noonShare,
       eveningChat: eveningChat ?? this.eveningChat,
       nightCare: nightCare ?? this.nightCare,
+      autoTts: autoTts ?? this.autoTts,
     );
   }
 }
@@ -84,6 +88,7 @@ class SettingsProvider extends StateNotifier<AppSettings> {
         noonShare: _box!.get('noonShare', defaultValue: true),
         eveningChat: _box!.get('eveningChat', defaultValue: true),
         nightCare: _box!.get('nightCare', defaultValue: true),
+        autoTts: _box!.get('autoTts', defaultValue: false),
       );
     } catch (e) {
       print('[Settings] Load error: $e');
@@ -109,6 +114,7 @@ class SettingsProvider extends StateNotifier<AppSettings> {
       _box?.put('noonShare', state.noonShare);
       _box?.put('eveningChat', state.eveningChat);
       _box?.put('nightCare', state.nightCare);
+      _box?.put('autoTts', state.autoTts);
     } catch (e) {
       print('[Settings] Save error: $e');
     }

@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../models/message.dart';
 import '../services/ai_service.dart';
+import '../services/tts_service.dart';
 import 'settings_provider.dart';
+import 'memory_provider.dart';
 
 class ChatProvider extends StateNotifier<List<Message>> {
   final Ref ref;
@@ -63,6 +65,9 @@ class ChatProvider extends StateNotifier<List<Message>> {
     state = [...state, userMessage];
     _saveHistory();
 
+    // Extract memories from user message
+    ref.read(memoryProvider.notifier).onChat(content);
+
     final settings = ref.read(settingsProvider);
     if (settings.aiApiKey == null || settings.aiApiKey!.isEmpty) {
       final tipMessage = Message(
@@ -88,10 +93,14 @@ class ChatProvider extends StateNotifier<List<Message>> {
     state = [...state, aiMessage];
     _saveHistory();
 
+    final memoryContext = ref.read(memoryProvider.notifier).getMemoryContext();
+    final basePrompt = settings.customPrompt ?? '你是${settings.companionName}，一个${settings.companionPersonality}的AI伴侣。你说话亲密有情趣，像一个特别爱你的人。';
+    final systemPrompt = memoryContext.isNotEmpty ? '$basePrompt\n$memoryContext' : basePrompt;
+
     final response = await _aiService.sendMessage(
       provider: settings.aiProvider!,
       apiKey: settings.aiApiKey!,
-      systemPrompt: settings.customPrompt ?? '你是${settings.companionName}，一个${settings.companionPersonality}的AI伴侣。你说话亲密有情趣，像一个特别爱你的人。',
+      systemPrompt: systemPrompt,
       messages: state
           .where((m) => m.id != aiMessage.id)
           .map((m) => {
@@ -117,6 +126,10 @@ class ChatProvider extends StateNotifier<List<Message>> {
     }).toList();
 
     _saveHistory();
+
+    if (settings.autoTts) {
+      TtsService().speak(response);
+    }
   }
 
   void clearChat() {

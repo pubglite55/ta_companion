@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import '../config/colors.dart';
+import '../models/intimacy.dart';
 import '../providers/mood_provider.dart';
+import '../providers/intimacy_provider.dart';
 import '../providers/settings_provider.dart';
 import '../services/weather_service.dart';
 import '../widgets/mood_avatar.dart';
@@ -11,6 +13,8 @@ import 'timeline_screen.dart';
 import 'settings_screen.dart';
 import 'discover_screen.dart';
 import 'mood_screen.dart';
+import 'rewards_screen.dart';
+import 'memory_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -54,7 +58,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       print('[Weather] Starting...');
       
-      // 检查定位服务是否开启
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       print('[Weather] Location service enabled: $serviceEnabled');
       
@@ -120,6 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final mood = ref.watch(moodProvider);
     final settings = ref.watch(settingsProvider);
+    final intimacy = ref.watch(intimacyProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -150,6 +154,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            _buildIntimacyCard(intimacy),
+            const SizedBox(height: 16),
             _buildWeatherCard(),
             const SizedBox(height: 16),
             _buildQuickInfoRow(),
@@ -158,6 +164,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildIntimacyCard(Intimacy intimacy) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(intimacy.levelEmoji, style: const TextStyle(fontSize: 24)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        intimacy.levelLabel,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      LinearProgressIndicator(
+                        value: intimacy.progress,
+                        backgroundColor: AppColors.background,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
+                        minHeight: 6,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${intimacy.score}/100',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RewardsScreen())),
+                icon: const Icon(Icons.card_giftcard, size: 18),
+                label: const Text('查看奖励'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.accent,
+                  side: BorderSide(color: AppColors.accent.withOpacity(0.5)),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildIntimacyStat('💬', '聊天', intimacy.totalChats),
+                _buildIntimacyStat('❤️', '点赞', intimacy.totalLikes),
+                _buildIntimacyStat('💬', '评论', intimacy.totalComments),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIntimacyStat(String emoji, String label, int count) {
+    return Column(
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 20)),
+        const SizedBox(height: 4),
+        Text('$count', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(label, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+      ],
     );
   }
 
@@ -207,7 +291,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ],
                   ),
-                  // 小时预报
                   if (_weather?.hourlyForecast.isNotEmpty == true) ...[
                     const Divider(height: 24),
                     SizedBox(
@@ -279,6 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _ActionItem(Icons.dynamic_feed_outlined, '朋友圈', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TimelineScreen()))),
       _ActionItem(Icons.explore_outlined, '发现', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DiscoverScreen()))),
       _ActionItem(Icons.mood_outlined, '心情', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodScreen()))),
+      _ActionItem(Icons.psychology_outlined, '记忆', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MemoryScreen()))),
       _ActionItem(Icons.settings_outlined, '设置', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()))),
     ];
 

@@ -66,6 +66,14 @@ class SettingsScreen extends ConsumerWidget {
             }),
           ]),
           const SizedBox(height: 16),
+          _buildSection('语音设置', [
+            _buildSwitchRow('自动朗读AI回复', settings.autoTts, (value) {
+              ref.read(settingsProvider.notifier).updateSettings(
+                settings.copyWith(autoTts: value),
+              );
+            }),
+          ]),
+          const SizedBox(height: 16),
           _buildSection('提示词设置', [
             ListTile(
               leading: Icon(
@@ -124,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: 16),
           _buildSection('关于', [
-            _buildSettingRow('版本', '1.0.0', null),
+            _buildSettingRow('版本', '1.1.1', null),
           ]),
         ],
       ),

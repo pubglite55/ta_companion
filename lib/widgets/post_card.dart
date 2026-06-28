@@ -95,12 +95,12 @@ class PostCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 12,
-                      backgroundColor: AppColors.accentGreen,
-                      child: const Text('我', style: TextStyle(fontSize: 10, color: Colors.white)),
+                      backgroundColor: c.isAI ? AppColors.accent : AppColors.accentGreen,
+                      child: Text(c.isAI ? 'TA' : '我', style: const TextStyle(fontSize: 8, color: Colors.white)),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(c, style: const TextStyle(fontSize: 13)),
+                      child: Text(c.text, style: const TextStyle(fontSize: 13)),
                     ),
                   ],
                 ),

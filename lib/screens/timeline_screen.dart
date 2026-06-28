@@ -5,6 +5,7 @@ import '../models/post.dart';
 import '../config/colors.dart';
 import '../services/ai_service.dart';
 import '../providers/settings_provider.dart';
+import '../providers/intimacy_provider.dart';
 
 class TimelineScreen extends ConsumerStatefulWidget {
   const TimelineScreen({super.key});
@@ -179,8 +180,12 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   void _toggleLike(int index) {
     setState(() {
       final p = _posts[index];
-      _posts[index] = p.copyWith(isLiked: !p.isLiked, likes: p.isLiked ? p.likes - 1 : p.likes + 1);
+      final wasLiked = p.isLiked;
+      _posts[index] = p.copyWith(isLiked: !wasLiked, likes: wasLiked ? p.likes - 1 : p.likes + 1);
     });
+    if (!_posts[index].isLiked) {
+      ref.read(intimacyProvider.notifier).onLike();
+    }
     _savePosts();
   }
 
@@ -189,6 +194,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
       final p = _posts[pi];
       _posts[pi] = p.copyWith(commentList: [...p.commentList, CommentItem(text: text, isAI: false)], comments: p.comments + 1);
     });
+    ref.read(intimacyProvider.notifier).onComment();
     _savePosts();
     _aiReply(pi);
   }
@@ -200,6 +206,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
       newComments.insert(ci + 1, CommentItem(text: text, isAI: false, isReply: true));
       _posts[pi] = p.copyWith(commentList: newComments, comments: p.comments + 1);
     });
+    ref.read(intimacyProvider.notifier).onReply();
     _savePosts();
     _aiReply(pi);
   }
@@ -254,6 +261,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
                 ));
               });
               Navigator.pop(ctx);
+              ref.read(intimacyProvider.notifier).onComment();
               _savePosts();
               _showSnackBar('发布成功！');
               _aiReplyToMyPost(0);

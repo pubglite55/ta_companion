@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/colors.dart';
 import '../providers/chat_provider.dart';
+import '../providers/intimacy_provider.dart';
 import '../widgets/message_bubble.dart';
+import '../widgets/typing_indicator.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -14,11 +16,13 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  String? _lastMessageId;
 
   void _sendMessage() {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
       ref.read(chatProvider.notifier).sendMessage(text);
+      ref.read(intimacyProvider.notifier).onChat();
       _controller.clear();
       _scrollToBottom();
     }
@@ -39,6 +43,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(chatProvider);
+
+    // Track if we're showing typing indicator
+    final isTyping = messages.isNotEmpty &&
+        messages.last.isFromCompanion &&
+        messages.last.content == '思考中...';
 
     return Scaffold(
       appBar: AppBar(
@@ -79,9 +88,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              itemCount: messages.length,
+              itemCount: messages.length + (isTyping ? 1 : 0),
               itemBuilder: (context, index) {
-                return MessageBubble(message: messages[index]);
+                if (isTyping && index == messages.length) {
+                  return const TypingIndicator();
+                }
+
+                final msg = messages[index];
+                final isNew = msg.id != _lastMessageId;
+                _lastMessageId = msg.id;
+
+                return MessageBubble(message: msg, isNew: isNew);
               },
             ),
           ),
