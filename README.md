@@ -1,5 +1,11 @@
 # TA - AI 灵魂伴侣
 
+<p align="center">
+  <a href="https://github.com/pubglite55/ta_companion/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/pubglite55/ta_companion?style=flat-square&label=Stars"></a>
+  <a href="https://github.com/pubglite55/ta_companion/commits/main"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/pubglite55/ta_companion?style=flat-square&label=Last%20Commit"></a>
+  <a href="https://github.com/pubglite55/ta_companion/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/pubglite55/ta_companion?style=flat-square&label=License"></a>
+</p>
+
 一个有「真实生活」的 AI 伴侣 Android App，基于 Flutter 开发。
 
 ## 功能特性
